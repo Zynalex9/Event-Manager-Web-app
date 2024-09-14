@@ -11,18 +11,20 @@ export async function sendMail({ email, emailType, userId }: any) {
       specialChars: false,
     });
 
+    console.log(`Generated OTP: ${OTP}`); // Log OTP for debugging
+
     if (emailType === 'VERIFY') {
       await User.findByIdAndUpdate(userId, {
         $set: {
           verifyEmailOTP: OTP,
-          verifyEmailOTPTime: Date.now() + 3600000, // 1 hour from now
+          verifyEmailOTPTime: new Date(Date.now() + 3600000), // 1 hour from now
         },
       });
     } else if (emailType === 'RESET') {
       await User.findByIdAndUpdate(userId, {
         $set: {
           forgetPasswordOTP: OTP,
-          forgetPasswordOTPTime: Date.now() + 3600000, // 1 hour from now
+          forgetPasswordOTPTime: new Date(Date.now() + 3600000), // 1 hour from now
         },
       });
     } else {
@@ -39,14 +41,15 @@ export async function sendMail({ email, emailType, userId }: any) {
     });
 
     const mailOptions = {
-      from: 'alzn952@gmail.com', // sender address
-      to: email, // list of receivers
-      subject: emailType === 'VERIFY' ? 'Verify your email' : 'Reset your password', // Subject line
+      from: 'alzn952@gmail.com',
+      to: email,
+      subject: emailType === 'VERIFY' ? 'Verify your email' : 'Reset your password',
       html: `<p>This is your ${emailType === 'VERIFY' ? 'verification' : 'reset'} code:</p>
              <h2>${OTP}</h2>`,
     };
 
     const mailResponse = await transport.sendMail(mailOptions);
+    console.log(`Mail Response: ${mailResponse.response}`); // Log mail response
     return mailResponse;
   } catch (error) {
     console.error('Error in sendMail:', error);
