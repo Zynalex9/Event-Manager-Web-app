@@ -4,12 +4,12 @@ const registrationSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model
+      ref: "User",
       required: true,
     },
     event: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Event", // Reference to the Event model
+      ref: "Event", 
       required: true,
     },
     status: {
@@ -19,7 +19,7 @@ const registrationSchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
-); // Automatically adds createdAt and updatedAt fields
+); 
 
 const RegisteredUsersInEvent =
   mongoose.models.Registration ||

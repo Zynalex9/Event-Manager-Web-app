@@ -1,54 +1,69 @@
 import mongoose from "mongoose";
+import slugify from "slugify";  // Import slugify for manual slug generation
 
-const eventSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
-    title: {
+    username: {
       type: String,
-      required: [true, "Enter the name of event"],
-      minlength: [3, "Title must be at least 3 characters long"],
-      maxlength: [100, "Title must be less than 100 characters long"],
+      unique: true,
+      required: [true, "Please provide a username"],
+      trim: true,
     },
-    shortDescription: {
+    slug: {
       type: String,
-      required: [true, "Enter the short description of event"],
-      minlength: [10, "Short Description must be at least 10 characters long"],
-      maxlength: [
-        200,
-        "Short Description must be less than 200 characters long",
-      ],
+      unique: true,
     },
-    description: {
+    email: {
       type: String,
-      required: [true, "Enter the description of event"],
-      minlength: [20, "Description must be at least 20 characters long"],
-      maxlength: [500, "Description must be less than 500 characters long"],
+      unique: true,
+      required: [true, "Please provide an email"],
+      trim: true,
     },
-    EventDate: {
+    password: {
       type: String,
-      required: true,
+      required: [true, "Please provide a password"],
+      trim: true,
     },
-    Location: {
-      type: String,
-      required: true,
-      default: "Remote",
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
-    Image: {
-      type: String,
-    },
-    EventType: {
-      type: String,
-    },
-    enrolledUser: [
+    enrolledEvents: [
       {
         id: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "User",  // Ensure this is a string, not the model itself
+          ref: "Event",
         },
       },
     ],
+    verifyEmailOTP: {
+      type: String,
+    },
+    verifyEmailOTPTime: {
+      type: Date,
+    },
+    forgetPasswordOTP: {
+      type: String,
+    },
+    forgetPasswordOTPTime: {
+      type: Date,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",  // Reference to the User who created the event
+      required: true,
+    },
+    
   },
   { timestamps: true }
 );
 
-const Events = mongoose.models.Event || mongoose.model("Event", eventSchema);
-export default Events;
+// Pre-save hook to generate slug from username
+userSchema.pre("save", function (next) {
+  if (!this.isModified("username")) return next();
+  this.slug = slugify(this.username, { lower: true, strict: true });
+  next();
+});
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+export default User;

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";  // Import slugify for manual slug generation
 
 const userSchema = new mongoose.Schema(
   {
@@ -7,6 +8,10 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: [true, "Please provide a username"],
       trim: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
     },
     email: {
       type: String,
@@ -43,9 +48,24 @@ const userSchema = new mongoose.Schema(
     forgetPasswordOTPTime: {
       type: Date,
     },
+    eventsCreated: [
+      {
+        id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Event",  // Reference to events the user has created
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
 
+// Pre-save hook to generate slug from username
+userSchema.pre("save", function (next) {
+  if (!this.isModified("username")) return next();
+  this.slug = slugify(this.username, { lower: true, strict: true });
+  next();
+});
+
 const User = mongoose.models.User || mongoose.model("User", userSchema);
-export default User
+export default User;
